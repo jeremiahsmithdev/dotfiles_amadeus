@@ -1,0 +1,17 @@
+
+1
+2
+asdf{{{
+3
+4
+adf}}}asdf
+4
+
+5
+5
+{{{
+2022/07/07 04:53:46.369429 sydlnxv002 APP INFO <cabin_state.py#184 TID#15> [PFX: 005C4MWCND0001] ME
+2022/07/07 04:53:46.369436 sydlnxv002 APP INFO <cabin_state.py#185 TID#15> [PFX: 005C4MWCND0001] Carrier checked: AF candidate carrier 'ME'
+2022/07/07 04:53:46.369442 sydlnxv002 APP INFO <cabin_state.py#188 TID#15> [PFX: 005C4MWCND0001] removing candidate 10DF2D00007E173D: MRK_ME: LINK with carrier ME
+2022/07/07 04:53:46.369450 sydlnxv002 APP INFO <flight_leg_solver.py#228 TID#15> [PFX: 005C4MWCND0001] }}}
+next processable candidate 10DF2D00007E173E: OP_AF: LINK

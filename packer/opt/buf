@@ -1,0 +1,36 @@
+In the BE log, this following line is seen for customer UPGRADE for the first leg, but not the second leg.
+<ProActiveOnloadRegradeList.cpp#684 TID#7> [PFX: 00JN5FISNP0001:CEQ3IOPLXQDIL42J4OF29A2R1:1] ONLOAD: "10A6CE00029EAE60 UPGRADE,TESTTONRT 0-OK Booked(Y)RGD PCV 0100.0000.0300.0100.0000.0000.0000.0100.0000.0100.0000.0000.0099.0000.0000.1355.62435017.0000 HKG-TPE 10A6CE00029EAE60 Onl:Y Rgd:J Org:Y OnlSts:NOK AccSts:ACC BefAccSts:ACC MFPrReg " is not allowed to upgrade due to No Upgrade flag being set : 'Y' so cannot be onloaded into cabin : 'J'.
+Analysis found that even though we see the correct business rules are being queried for both legs, they are used for something else, irrelevent to setting the "no upgrade" flag for the customers. The problem seems to lie within ProActiveOnloadList::CheckProActiveOnloadSolution, which calls getFlightLegDates, where the generated aLegList contains only the first leg.
+
+The flow for proactive onload triggered from departure plan activity:
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/service/SvcAutoPOnload.cpp?r=c090cad6#83
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/AutoProActiveOnloadList.cpp?r=c090cad6#513
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/AutoProActiveOnloadList.cpp?r=c090cad6#540
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/AcceptanceManager.cpp?r=c090cad6#710
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/AcceptanceManager.cpp?r=c090cad6#731
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/AbstractAcceptance.cpp?r=b8228bf1#223
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/AbstractAcceptance.cpp?r=b8228bf1#254
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/Acceptance.cpp?r=149dcd04#1778
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/Acceptance.cpp?r=149dcd04#1923
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/AcceptanceFunctional.hpp?r=c090cad6#261
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/AcceptanceFunctional.hpp?r=c090cad6#275
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/CheckProductPonloadCandidate.cpp?r=790ac7ea#224
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngacc/src/bom/CheckProductPonloadCandidate.cpp?r=790ac7ea#236
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/pub/OnlLocalPublisher.cpp?r=f98d430b#42
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/pub/OnlLocalPublisher.cpp?r=f98d430b#46
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1314
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1349
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1409
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1930
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1955
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadFlightList.cpp?r=c090cad6#150
+This gets only the first leg:
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadFlightList.cpp?r=c090cad6#165
+So this for loop will only be executed once, for the first leg:
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1355
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1409
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1930
+Only called for the first leg:
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1955
+ https://opengrok.cicd.rnd.amadeus.net/xref/DCS/cml/cmapp/ngonl/src/bom/ProActiveOnloadList.cpp?r=c090cad6#1136
+

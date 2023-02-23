@@ -1,0 +1,135 @@
+[submodule "packer/gruvbox-flat.nvim"]
+	path = packer/gruvbox-flat.nvim
+	url = https://github.com/eddyekofo94/gruvbox-flat.nvim.git
+[submodule "packer/vim-clap"]
+	path = packer/vim-clap
+	url = https://github.com/liuchengxu/vim-clap.git
+[submodule "packer/archive/vim-airline"]
+	path = packer/archive/vim-airline
+	url = https://github.com/vim-airline/vim-airline.git
+[submodule "packer/archive/vim-startify"]
+	path = packer/archive/vim-startify
+	url = https://github.com/mhinz/vim-startify.git
+[submodule "packer/nightfox.nvim"]
+	path = packer/nightfox.nvim
+	url = https://github.com/EdenEast/nightfox.nvim.git
+[submodule "packer/start/bufferline.nvim"]
+	path = packer/start/bufferline.nvim
+	url = https://github.com/akinsho/bufferline.nvim.git
+[submodule "packer/start/gruvbox"]
+	path = packer/start/gruvbox
+	url = https://github.com/morhetz/gruvbox.git
+[submodule "packer/start/vim-floaterm"]
+	path = packer/start/vim-floaterm
+	url = https://github.com/voldikss/vim-floaterm.git
+[submodule "packer/start/nvim-compe"]
+	path = packer/start/nvim-compe
+	url = https://github.com/hrsh7th/nvim-compe.git
+[submodule "packer/start/quick-scope"]
+	path = packer/start/quick-scope
+	url = https://github.com/unblevable/quick-scope.git
+[submodule "packer/start/nvim-treesitter"]
+	path = packer/start/nvim-treesitter
+	url = https://github.com/nvim-treesitter/nvim-treesitter.git
+[submodule "packer/start/fzf"]
+	path = packer/start/fzf
+	url = https://github.com/junegunn/fzf.git
+[submodule "packer/start/vim-pseudocl"]
+	path = packer/start/vim-pseudocl
+	url = https://github.com/junegunn/vim-pseudocl.git
+[submodule "packer/start/vim-slash"]
+	path = packer/start/vim-slash
+	url = https://github.com/junegunn/vim-slash.git
+[submodule "packer/start/gitsigns.nvim"]
+	path = packer/start/gitsigns.nvim
+	url = https://github.com/lewis6991/gitsigns.nvim.git
+[submodule "packer/start/dashboard-nvim"]
+	path = packer/start/dashboard-nvim
+	url = https://github.com/glepnir/dashboard-nvim.git
+[submodule "packer/start/lightspeed.nvim"]
+	path = packer/start/lightspeed.nvim
+	url = https://github.com/ggandor/lightspeed.nvim.git
+[submodule "packer/start/nvim-cmp"]
+	path = packer/start/nvim-cmp
+	url = https://github.com/hrsh7th/nvim-cmp.git
+[submodule "packer/start/fzf.vim"]
+	path = packer/start/fzf.vim
+	url = https://github.com/junegunn/fzf.vim.git
+[submodule "packer/start/nvim-tree.lua"]
+	path = packer/start/nvim-tree.lua
+	url = https://github.com/kyazdani42/nvim-tree.lua.git
+[submodule "packer/start/vim-smoothie"]
+	path = packer/start/vim-smoothie
+	url = https://github.com/psliwka/vim-smoothie.git
+[submodule "packer/start/lsp_signature.nvim"]
+	path = packer/start/lsp_signature.nvim
+	url = https://github.com/ray-x/lsp_signature.nvim.git
+[submodule "packer/start/packer.nvim"]
+	path = packer/start/packer.nvim
+	url = https://github.com/wbthomason/packer.nvim
+[submodule "packer/start/vim-ccls"]
+	path = packer/start/vim-ccls
+	url = https://github.com/m-pilia/vim-ccls.git
+[submodule "packer/start/nvim-web-devicons"]
+	path = packer/start/nvim-web-devicons
+	url = https://github.com/kyazdani42/nvim-web-devicons.git
+[submodule "packer/start/plenary.nvim"]
+	path = packer/start/plenary.nvim
+	url = https://github.com/nvim-lua/plenary.nvim.git
+[submodule "packer/start/vim-tmux-navigator"]
+	path = packer/start/vim-tmux-navigator
+	url = https://github.com/christoomey/vim-tmux-navigator.git
+[submodule "packer/start/tcomment_vim"]
+	path = packer/start/tcomment_vim
+	url = https://github.com/tomtom/tcomment_vim.git
+[submodule "packer/start/lualine.nvim"]
+	path = packer/start/lualine.nvim
+	url = https://github.com/nvim-lualine/lualine.nvim.git
+[submodule "packer/start/vim-fnr"]
+	path = packer/start/vim-fnr
+	url = https://github.com/junegunn/vim-fnr.git
+[submodule "packer/start/nvim-lspconfig"]
+	path = packer/start/nvim-lspconfig
+	url = https://github.com/neovim/nvim-lspconfig.git
+[submodule "packer/vim-signify"]
+	path = packer/vim-signify
+	url = https://github.com/mhinz/vim-signify.git
+[submodule "packer/gruvbox-material"]
+	path = packer/gruvbox-material
+	url = https://github.com/sainnhe/gruvbox-material.git
+[submodule "packer/lush.nvim"]
+	path = packer/lush.nvim
+	url = https://github.com/rktjmp/lush.nvim.git
+[submodule "packer/gruvbox.nvim"]
+	path = packer/gruvbox.nvim
+	url = https://github.com/ellisonleao/gruvbox.nvim.git
+[submodule "packer/vim-gitgutter"]
+	path = packer/vim-gitgutter
+	url = https://github.com/airblade/vim-gitgutter.git
+[submodule "packer/nvim-lsp-installer"]
+	path = packer/nvim-lsp-installer
+	url = https://github.com/williamboman/nvim-lsp-installer.git
+[submodule "packer/vim-fugitive"]
+	path = packer/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive.git
+[submodule "packer/ale"]
+	path = packer/ale
+	url = https://github.com/dense-analysis/ale.git
+[submodule "packer/hop.nvim"]
+	path = packer/hop.nvim
+	url = https://github.com/phaazon/hop.nvim.git
+[submodule "packer/opt/vim-surround"]
+	path = packer/opt/vim-surround
+	url = https://github.com/tpope/vim-surround.git
+[submodule "packer/opt/vim-move"]
+	path = packer/opt/vim-move
+	url = https://github.com/matze/vim-move.git
+[submodule "packer/opt/vim-peekaboo"]
+	path = packer/opt/vim-peekaboo
+	url = https://github.com/junegunn/vim-peekaboo.git
+[submodule "packer/opt/nvim-ale-diagnostic"]
+	path = packer/opt/nvim-ale-diagnostic
+	url = https://github.com/nathanmsmith/nvim-ale-diagnostic.git
+[submodule "packer/start/nvim-lspconfig/nvim-lspconfig"]
+	path = packer/start/nvim-lspconfig/nvim-lspconfig
+	url = https://github.com/neovim/nvim-lspconfig

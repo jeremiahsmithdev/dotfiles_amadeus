@@ -1,0 +1,821 @@
+SCRIPT  /gctmp/jesmith/.mount_nvimmxaX7G/usr/share/nvim/runtime/scripts.vim
+Sourced 1 time
+Total time:   0.000913
+ Self time:   0.000913
+
+count  total (s)   self (s)
+                            " Vim support file to detect file types in scripts
+                            "
+                            " Maintainer:	Bram Moolenaar <Bram@vim.org>
+                            " Last change:	2021 Jan 22
+                            
+                            " This file is called by an autocommand for every file that has just been
+                            " loaded into a buffer.  It checks if the type of file can be recognized by
+                            " the file contents.  The autocommand is in $VIMRUNTIME/filetype.vim.
+                            "
+                            " Note that the pattern matches are done with =~# to avoid the value of the
+                            " 'ignorecase' option making a difference.  Where case is to be ignored use
+                            " =~? instead.  Do not use =~ anywhere.
+                            
+                            
+                            " Only do the rest when the FileType autocommand has not been triggered yet.
+    1              0.000006 if did_filetype()
+                              finish
+    1              0.000001 endif
+                            
+                            " Load the user defined scripts file first
+                            " Only do this when the FileType autocommand has not been triggered yet
+    1              0.000005 if exists("myscriptsfile") && filereadable(expand(myscriptsfile))
+                              execute "source " . myscriptsfile
+                              if did_filetype()
+                                finish
+                              endif
+    1              0.000001 endif
+                            
+                            " Line continuation is used here, remove 'C' from 'cpoptions'
+    1              0.000010 let s:cpo_save = &cpo
+    1              0.000013 set cpo&vim
+                            
+    1              0.000005 let s:line1 = getline(1)
+                            
+    1              0.000005 if s:line1 =~# "^#!"
+                              " A script that starts with "#!".
+                            
+                              " Check for a line like "#!/usr/bin/env {options} bash".  Turn it into
+                              " "#!/usr/bin/bash" to make matching easier.
+                              " Recognize only a few {options} that are commonly used.
+                              if s:line1 =~# '^#!\s*\S*\<env\s'
+                                let s:line1 = substitute(s:line1, '\S\+=\S\+', '', 'g')
+                                let s:line1 = substitute(s:line1, '\(-[iS]\|--ignore-environment\|--split-string\)', '', '')
+                                let s:line1 = substitute(s:line1, '\<env\s\+', '', '')
+                              endif
+                            
+                              " Get the program name.
+                              " Only accept spaces in PC style paths: "#!c:/program files/perl [args]".
+                              " If the word env is used, use the first word after the space:
+                              " "#!/usr/bin/env perl [path/args]"
+                              " If there is no path use the first word: "#!perl [path/args]".
+                              " Otherwise get the last word after a slash: "#!/usr/bin/perl [path/args]".
+                              if s:line1 =~# '^#!\s*\a:[/\\]'
+                                let s:name = substitute(s:line1, '^#!.*[/\\]\(\i\+\).*', '\1', '')
+                              elseif s:line1 =~# '^#!.*\<env\>'
+                                let s:name = substitute(s:line1, '^#!.*\<env\>\s\+\(\i\+\).*', '\1', '')
+                              elseif s:line1 =~# '^#!\s*[^/\\ ]*\>\([^/\\]\|$\)'
+                                let s:name = substitute(s:line1, '^#!\s*\([^/\\ ]*\>\).*', '\1', '')
+                              else
+                                let s:name = substitute(s:line1, '^#!\s*\S*[/\\]\(\i\+\).*', '\1', '')
+                              endif
+                            
+                              " tcl scripts may have #!/bin/sh in the first line and "exec wish" in the
+                              " third line.  Suggested by Steven Atkinson.
+                              if getline(3) =~# '^exec wish'
+                                let s:name = 'wish'
+                              endif
+                            
+                              " Bourne-like shell scripts: bash bash2 ksh ksh93 sh
+                              if s:name =~# '^\(bash\d*\|\|ksh\d*\|sh\)\>'
+                                call dist#ft#SetFileTypeSH(s:line1)	" defined in filetype.vim
+                            
+                                " csh scripts
+                              elseif s:name =~# '^csh\>'
+                                if exists("g:filetype_csh")
+                                  call dist#ft#SetFileTypeShell(g:filetype_csh)
+                                else
+                                  call dist#ft#SetFileTypeShell("csh")
+                                endif
+                            
+                                " tcsh scripts
+                              elseif s:name =~# '^tcsh\>'
+                                call dist#ft#SetFileTypeShell("tcsh")
+                            
+                                " Z shell scripts
+                              elseif s:name =~# '^zsh\>'
+                                set ft=zsh
+                            
+                                " TCL scripts
+                              elseif s:name =~# '^\(tclsh\|wish\|expectk\|itclsh\|itkwish\)\>'
+                                set ft=tcl
+                            
+                                " Expect scripts
+                              elseif s:name =~# '^expect\>'
+                                set ft=expect
+                            
+                                " Gnuplot scripts
+                              elseif s:name =~# '^gnuplot\>'
+                                set ft=gnuplot
+                            
+                                " Makefiles
+                              elseif s:name =~# 'make\>'
+                                set ft=make
+                            
+                                " Pike
+                              elseif s:name =~# '^pike\%(\>\|[0-9]\)'
+                                set ft=pike
+                            
+                                " Lua
+                              elseif s:name =~# 'lua'
+                                set ft=lua
+                            
+                                " Perl
+                              elseif s:name =~# 'perl'
+                                set ft=perl
+                            
+                                " PHP
+                              elseif s:name =~# 'php'
+                                set ft=php
+                            
+                                " Python
+                              elseif s:name =~# 'python'
+                                set ft=python
+                            
+                                " Groovy
+                              elseif s:name =~# '^groovy\>'
+                                set ft=groovy
+                            
+                                " Raku
+                              elseif s:name =~# 'raku'
+                                set ft=raku
+                            
+                                " Ruby
+                              elseif s:name =~# 'ruby'
+                                set ft=ruby
+                            
+                                " JavaScript
+                              elseif s:name =~# 'node\(js\)\=\>\|js\>' || s:name =~# 'rhino\>'
+                                set ft=javascript
+                            
+                                " BC calculator
+                              elseif s:name =~# '^bc\>'
+                                set ft=bc
+                            
+                                " sed
+                              elseif s:name =~# 'sed\>'
+                                set ft=sed
+                            
+                                " OCaml-scripts
+                              elseif s:name =~# 'ocaml'
+                                set ft=ocaml
+                            
+                                " Awk scripts; also finds "gawk"
+                              elseif s:name =~# 'awk\>'
+                                set ft=awk
+                            
+                                " Website MetaLanguage
+                              elseif s:name =~# 'wml'
+                                set ft=wml
+                            
+                                " Scheme scripts
+                              elseif s:name =~# 'scheme'
+                                set ft=scheme
+                            
+                                " CFEngine scripts
+                              elseif s:name =~# 'cfengine'
+                                set ft=cfengine
+                            
+                                " Erlang scripts
+                              elseif s:name =~# 'escript'
+                                set ft=erlang
+                            
+                                " Haskell
+                              elseif s:name =~# 'haskell'
+                                set ft=haskell
+                            
+                                " Scala
+                              elseif s:name =~# 'scala\>'
+                                set ft=scala
+                            
+                                " Clojure
+                              elseif s:name =~# 'clojure'
+                                set ft=clojure
+                            
+                                " Free Pascal
+                              elseif s:name =~# 'instantfpc\>'
+                                set ft=pascal
+                            
+                                " Fennel
+                              elseif s:name =~# 'fennel\>'
+                                set ft=fennel
+                            
+                              endif
+                              unlet s:name
+                            
+    1              0.000001 else
+                              " File does not start with "#!".
+                            
+    1              0.000002   let s:line2 = getline(2)
+    1              0.000002   let s:line3 = getline(3)
+    1              0.000002   let s:line4 = getline(4)
+    1              0.000001   let s:line5 = getline(5)
+                            
+                              " Bourne-like shell scripts: sh ksh bash bash2
+    1              0.000003   if s:line1 =~# '^:$'
+                                call dist#ft#SetFileTypeSH(s:line1)	" defined in filetype.vim
+                            
+                              " Z shell scripts
+    1              0.000020   elseif s:line1 =~# '^#compdef\>' || s:line1 =~# '^#autoload\>' ||
+                                    \ "\n".s:line1."\n".s:line2."\n".s:line3."\n".s:line4."\n".s:line5 =~# '\n\s*emulate\s\+\%(-[LR]\s\+\)\=[ckz]\=sh\>'
+                                set ft=zsh
+                            
+                              " ELM Mail files
+    1              0.000009   elseif s:line1 =~# '^From \([a-zA-Z][a-zA-Z_0-9\.=-]*\(@[^ ]*\)\=\|-\) .* \(19\|20\)\d\d$'
+                                set ft=mail
+                            
+                              " Mason
+    1              0.000003   elseif s:line1 =~# '^<[%&].*>'
+                                set ft=mason
+                            
+                              " Vim scripts (must have '" vim' as the first line to trigger this)
+    1              0.000003   elseif s:line1 =~# '^" *[vV]im$'
+                                set ft=vim
+                            
+                              " libcxx and libstdc++ standard library headers like "iostream" do not have
+                              " an extension, recognize the Emacs file mode.
+    1              0.000003   elseif s:line1 =~? '-\*-.*C++.*-\*-'
+                                set ft=cpp
+                            
+                              " MOO
+    1              0.000007   elseif s:line1 =~# '^\*\* LambdaMOO Database, Format Version \%([1-3]\>\)\@!\d\+ \*\*$'
+                                set ft=moo
+                            
+                                " Diff file:
+                                " - "diff" in first line (context diff)
+                                " - "Only in " in first line
+                                " - "--- " in first line and "+++ " in second line (unified diff).
+                                " - "*** " in first line and "--- " in second line (context diff).
+                                " - "# It was generated by makepatch " in the second line (makepatch diff).
+                                " - "Index: <filename>" in the first line (CVS file)
+                                " - "=== ", line of "=", "---", "+++ " (SVK diff)
+                                " - "=== ", "--- ", "+++ " (bzr diff, common case)
+                                " - "=== (removed|added|renamed|modified)" (bzr diff, alternative)
+                                " - "# HG changeset patch" in first line (Mercurial export format)
+    1              0.000040   elseif s:line1 =~# '^\(diff\>\|Only in \|\d\+\(,\d\+\)\=[cda]\d\+\>\|# It was generated by makepatch \|Index:\s\+\f\+\r\=$\|===== \f\+ \d\+\.\d\+ vs edited\|==== //\f\+#\d\+\|# HG changeset patch\)'
+                            	\ || (s:line1 =~# '^--- ' && s:line2 =~# '^+++ ')
+                            	\ || (s:line1 =~# '^\* looking for ' && s:line2 =~# '^\* comparing to ')
+                            	\ || (s:line1 =~# '^\*\*\* ' && s:line2 =~# '^--- ')
+                            	\ || (s:line1 =~# '^=== ' && ((s:line2 =~# '^=\{66\}' && s:line3 =~# '^--- ' && s:line4 =~# '^+++') || (s:line2 =~# '^--- ' && s:line3 =~# '^+++ ')))
+                            	\ || (s:line1 =~# '^=== \(removed\|added\|renamed\|modified\)')
+                                set ft=diff
+                            
+                                " PostScript Files (must have %!PS as the first line, like a2ps output)
+    1              0.000003   elseif s:line1 =~# '^%![ \t]*PS'
+                                set ft=postscr
+                            
+                                " M4 scripts: Guess there is a line that starts with "dnl".
+    1              0.000011   elseif s:line1 =~# '^\s*dnl\>'
+                            	\ || s:line2 =~# '^\s*dnl\>'
+                            	\ || s:line3 =~# '^\s*dnl\>'
+                            	\ || s:line4 =~# '^\s*dnl\>'
+                            	\ || s:line5 =~# '^\s*dnl\>'
+                                set ft=m4
+                            
+                                " AmigaDos scripts
+    1              0.000004   elseif $TERM == "amiga"
+                            	\ && (s:line1 =~# "^;" || s:line1 =~? '^\.bra')
+                                set ft=amiga
+                            
+                                " SiCAD scripts (must have procn or procd as the first line to trigger this)
+    1              0.000004   elseif s:line1 =~? '^ *proc[nd] *$'
+                                set ft=sicad
+                            
+                                " Purify log files start with "****  Purify"
+    1              0.000003   elseif s:line1 =~# '^\*\*\*\*  Purify'
+                                set ft=purifylog
+                            
+                                " XML
+    1              0.000003   elseif s:line1 =~# '<?\s*xml.*?>'
+                                set ft=xml
+                            
+                                " XHTML (e.g.: PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN")
+    1              0.000003   elseif s:line1 =~# '\<DTD\s\+XHTML\s'
+                                set ft=xhtml
+                            
+                                " HTML (e.g.: <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN")
+                                " Avoid "doctype html", used by slim.
+    1              0.000003   elseif s:line1 =~? '<!DOCTYPE\s\+html\>'
+                                set ft=html
+                            
+                                " PDF
+    1              0.000002   elseif s:line1 =~# '^%PDF-'
+                                set ft=pdf
+                            
+                                " XXD output
+    1              0.000006   elseif s:line1 =~# '^\x\{7}: \x\{2} \=\x\{2} \=\x\{2} \=\x\{2} '
+                                set ft=xxd
+                            
+                                " RCS/CVS log output
+    1              0.000004   elseif s:line1 =~# '^RCS file:' || s:line2 =~# '^RCS file:'
+                                set ft=rcslog
+                            
+                                " CVS commit
+    1              0.000005   elseif s:line2 =~# '^CVS:' || getline("$") =~# '^CVS: '
+                                set ft=cvs
+                            
+                                " Prescribe
+    1              0.000002   elseif s:line1 =~# '^!R!'
+                                set ft=prescribe
+                            
+                                " Send-pr
+    1              0.000002   elseif s:line1 =~# '^SEND-PR:'
+                                set ft=sendpr
+                            
+                                " SNNS files
+    1              0.000004   elseif s:line1 =~# '^SNNS network definition file'
+                                set ft=snnsnet
+    1              0.000003   elseif s:line1 =~# '^SNNS pattern definition file'
+                                set ft=snnspat
+    1              0.000003   elseif s:line1 =~# '^SNNS result file'
+                                set ft=snnsres
+                            
+                                " Virata
+    1              0.000012   elseif s:line1 =~# '^%.\{-}[Vv]irata'
+                            	\ || s:line2 =~# '^%.\{-}[Vv]irata'
+                            	\ || s:line3 =~# '^%.\{-}[Vv]irata'
+                            	\ || s:line4 =~# '^%.\{-}[Vv]irata'
+                            	\ || s:line5 =~# '^%.\{-}[Vv]irata'
+                                set ft=virata
+                            
+                                " Strace
+    1              0.000006   elseif s:line1 =~# '[0-9:.]* *execve(' || s:line1 =~# '^__libc_start_main'
+                                set ft=strace
+                            
+                                " VSE JCL
+    1              0.000004   elseif s:line1 =~# '^\* $$ JOB\>' || s:line1 =~# '^// *JOB\>'
+                                set ft=vsejcl
+                            
+                                " TAK and SINDA
+    1              0.000005   elseif s:line4 =~# 'K & K  Associates' || s:line2 =~# 'TAK 2000'
+                                set ft=takout
+    1              0.000004   elseif s:line3 =~# 'S Y S T E M S   I M P R O V E D '
+                                set ft=sindaout
+    1              0.000003   elseif getline(6) =~# 'Run Date: '
+                                set ft=takcmp
+    1              0.000003   elseif getline(9) =~# 'Node    File  1'
+                                set ft=sindacmp
+                            
+                                " DNS zone files
+    1              0.000010   elseif s:line1.s:line2.s:line3.s:line4 =~# '^; <<>> DiG [0-9.]\+.* <<>>\|$ORIGIN\|$TTL\|IN\s\+SOA'
+                                set ft=bindzone
+                            
+                                " BAAN
+    1              0.000015   elseif s:line1 =~# '|\*\{1,80}' && s:line2 =~# 'VRC '
+                            	\ || s:line2 =~# '|\*\{1,80}' && s:line3 =~# 'VRC '
+                                set ft=baan
+                            
+                              " Valgrind
+    1              0.000006   elseif s:line1 =~# '^==\d\+== valgrind' || s:line3 =~# '^==\d\+== Using valgrind'
+                                set ft=valgrind
+                            
+                              " Go docs
+    1              0.000003   elseif s:line1 =~# '^PACKAGE DOCUMENTATION$'
+                                set ft=godoc
+                            
+                              " Renderman Interface Bytestream
+    1              0.000003   elseif s:line1 =~# '^##RenderMan'
+                                set ft=rib
+                            
+                              " Scheme scripts
+    1              0.000005   elseif s:line1 =~# 'exec\s\+\S*scheme' || s:line2 =~# 'exec\s\+\S*scheme'
+                                set ft=scheme
+                            
+                              " Git output
+    1              0.000011   elseif s:line1 =~# '^\(commit\|tree\|object\) \x\{40\}\>\|^tag \S\+$'
+                                set ft=git
+                            
+                               " Gprof (gnu profiler)
+    1              0.000003    elseif s:line1 == 'Flat profile:'
+                                 \ && s:line2 == ''
+                                 \ && s:line3 =~# '^Each sample counts as .* seconds.$'
+                                 set ft=gprof
+                            
+                              " Erlang terms
+                              " (See also: http://www.gnu.org/software/emacs/manual/html_node/emacs/Choosing-Modes.html#Choosing-Modes)
+    1              0.000003   elseif s:line1 =~? '-\*-.*erlang.*-\*-'
+                                set ft=erlang
+                            
+                              " YAML
+    1              0.000002   elseif s:line1 =~# '^%YAML'
+                                set ft=yaml
+                            
+                              " CVS diff
+    1              0.000001   else
+    1              0.000002     let s:lnum = 1
+    1              0.000005     while getline(s:lnum) =~# "^? " && s:lnum < line("$")
+                                  let s:lnum += 1
+    1              0.000001     endwhile
+    1              0.000004     if getline(s:lnum) =~# '^Index:\s\+\f\+$'
+                                  set ft=diff
+                            
+                                  " locale input files: Formal Definitions of Cultural Conventions
+                                  " filename must be like en_US, fr_FR@euro or en_US.UTF-8
+    1              0.000009     elseif expand("%") =~# '\a\a_\a\a\($\|[.@]\)\|i18n$\|POSIX$\|translit_'
+                                  let s:lnum = 1
+                                  while s:lnum < 100 && s:lnum < line("$")
+                            	if getline(s:lnum) =~# '^LC_\(IDENTIFICATION\|CTYPE\|COLLATE\|MONETARY\|NUMERIC\|TIME\|MESSAGES\|PAPER\|TELEPHONE\|MEASUREMENT\|NAME\|ADDRESS\)$'
+                            	  setf fdcc
+                            	  break
+                            	endif
+                            	let s:lnum += 1
+                                  endwhile
+    1              0.000001     endif
+    1              0.000002     unlet s:lnum
+                            
+    1              0.000001   endif
+                            
+    1              0.000002   unlet s:line2 s:line3 s:line4 s:line5
+                            
+    1              0.000001 endif
+                            
+                            " Restore 'cpoptions'
+    1              0.000008 let &cpo = s:cpo_save
+                            
+    1              0.000003 unlet s:cpo_save s:line1
+
+FUNCTION  1()
+    Defined: /gctmp/jesmith/.mount_nvimmxaX7G/usr/share/nvim/runtime/autoload/provider/clipboard.vim:22
+Called 1 time
+Total time:   0.000019
+ Self time:   0.000019
+
+count  total (s)   self (s)
+                              " At this point this nvim instance might already have launched
+                              " a new provider instance. Don't drop ownership in this case.
+    1              0.000004   if self.owner == a:jobid
+    1              0.000003     let self.owner = 0
+    1              0.000001   endif
+    1              0.000001   if a:data != 0
+                                echohl WarningMsg
+                                echomsg 'clipboard: error invoking '.get(self.argv, 0, '?').': '.join(self.stderr)
+                                echohl None
+    1              0.000001   endif
+
+FUNCTION  2()
+    Defined: /gctmp/jesmith/.mount_nvimmxaX7G/usr/share/nvim/runtime/autoload/provider/clipboard.vim:153
+Called 1 time
+Total time:   0.005132
+ Self time:   0.000067
+
+count  total (s)   self (s)
+    1              0.000005   if type(s:paste[a:reg]) == v:t_func
+                                return s:paste[a:reg]()
+    1              0.000003   elseif s:selections[a:reg].owner > 0
+                                return s:selections[a:reg].data
+    1              0.000001   end
+                            
+    1   0.005083   0.000019   let clipboard_data = s:try_cmd(s:paste[a:reg])
+    1              0.000029   if match(&clipboard, '\v(unnamed|unnamedplus)') >= 0 && type(clipboard_data) == v:t_list && get(s:selections[a:reg].data, 0, []) ==# clipboard_data
+                                " When system clipboard return is same as our cache return the cache
+                                " as it contains regtype information
+                                return s:selections[a:reg].data
+    1              0.000000   end
+    1              0.000002   return clipboard_data
+
+FUNCTION  3()
+    Defined: /gctmp/jesmith/.mount_nvimmxaX7G/usr/share/nvim/runtime/autoload/provider/clipboard.vim:171
+Called 1 time
+Total time:   0.002152
+ Self time:   0.002152
+
+count  total (s)   self (s)
+    1              0.000002   if a:reg == '"'
+                                call s:clipboard.set(a:lines,a:regtype,'+')
+                                if s:copy['*'] != s:copy['+']
+                                  call s:clipboard.set(a:lines,a:regtype,'*')
+                                end
+                                return 0
+    1              0.000000   end
+                            
+    1              0.000006   if type(s:copy[a:reg]) == v:t_func
+                                call s:copy[a:reg](a:lines, a:regtype)
+                                return 0
+    1              0.000000   end
+                            
+    1              0.000001   if s:cache_enabled == 0
+                                call s:try_cmd(s:copy[a:reg], a:lines)
+                                "Cache it anyway we can compare it later to get regtype of the yank
+                                let s:selections[a:reg] = copy(s:selection)
+                                let s:selections[a:reg].data = [a:lines, a:regtype]
+                                return 0
+    1              0.000000   end
+                            
+    1              0.000011   if s:selections[a:reg].owner > 0
+                                let prev_job = s:selections[a:reg].owner
+    1              0.000000   end
+    1              0.000007   let s:selections[a:reg] = copy(s:selection)
+    1              0.000002   let selection = s:selections[a:reg]
+    1              0.000003   let selection.data = [a:lines, a:regtype]
+    1              0.000002   let selection.argv = s:copy[a:reg]
+    1              0.000002   let selection.detach = s:cache_enabled
+    1              0.000001   let selection.cwd = "/"
+    1              0.002046   let jobid = jobstart(selection.argv, selection)
+    1              0.000003   if jobid > 0
+    1              0.000010     call jobsend(jobid, a:lines)
+    1              0.000003     call jobclose(jobid, 'stdin')
+                                " xclip does not close stdout when receiving input via stdin
+    1              0.000003     if selection.argv[0] ==# 'xclip'
+                                  call jobclose(jobid, 'stdout')
+    1              0.000001     endif
+    1              0.000002     let selection.owner = jobid
+    1              0.000001     let ret = 1
+                              else
+                                echohl WarningMsg
+                                echomsg 'clipboard: failed to execute: '.(s:copy[a:reg])
+                                echohl None
+                                let ret = 1
+    1              0.000000   endif
+                            
+                              " The previous provider instance should exit when the new one takes
+                              " ownership, but kill it to be sure we don't fill up the job table.
+    1              0.000002   if exists('prev_job')
+                                call timer_start(1000, {... -> jobwait([prev_job], 0)[0] == -1 && jobstop(prev_job)})
+    1              0.000000   endif
+                            
+    1              0.000003   return ret
+
+FUNCTION  <SNR>67_ShouldForwardNavigationBackToTmux()
+    Defined: ~/local/share/nvim/site/pack/packer/start/vim-tmux-navigator/plugin/tmux_navigator.vim:86
+Called 1 time
+Total time:   0.000010
+ Self time:   0.000010
+
+count  total (s)   self (s)
+    1              0.000003   if g:tmux_navigator_disable_when_zoomed && s:TmuxVimPaneIsZoomed()
+                                return 0
+    1              0.000001   endif
+    1              0.000003   return a:tmux_last_pane || a:at_tab_page_edge
+
+FUNCTION  <SNR>64_wrap()
+    Defined: ~/local/share/nvim/site/pack/packer/start/vim-slash/plugin/slash.vim:23
+Called 3 times
+Total time:   0.000066
+ Self time:   0.000066
+
+count  total (s)   self (s)
+    3              0.000044   if mode() == 'c' && stridx('/?', getcmdtype()) < 0
+    3              0.000011     return a:seq
+                              endif
+                              silent! autocmd! slash
+                              set hlsearch
+                              return a:seq."\<plug>(slash-trailer)"
+
+FUNCTION  <SNR>67_TmuxSocket()
+    Defined: ~/local/share/nvim/site/pack/packer/start/vim-tmux-navigator/plugin/tmux_navigator.vim:57
+Called 1 time
+Total time:   0.000010
+ Self time:   0.000010
+
+count  total (s)   self (s)
+                              " The socket path is the first value in the comma-separated list of $TMUX.
+    1              0.000009   return split($TMUX, ',')[0]
+
+FUNCTION  <SNR>51_on_insert_enter()
+    Defined: ~/local/share/nvim/site/pack/packer/start/nvim-compe/plugin/compe.vim:25
+Called 1 time
+Total time:   0.000019
+ Self time:   0.000019
+
+count  total (s)   self (s)
+    1              0.000018   call luaeval('require"compe"._on_insert_enter()')
+
+FUNCTION  <SNR>67_TmuxAwareNavigate()
+    Defined: ~/local/share/nvim/site/pack/packer/start/vim-tmux-navigator/plugin/tmux_navigator.vim:93
+Called 1 time
+Total time:   0.190835
+ Self time:   0.000117
+
+count  total (s)   self (s)
+    1              0.000006   let nr = winnr()
+    1              0.000005   let tmux_last_pane = (a:direction == 'p' && s:tmux_is_last_pane)
+    1              0.000002   if !tmux_last_pane
+    1   0.000025   0.000011     call s:VimNavigate(a:direction)
+    1              0.000001   endif
+    1              0.000003   let at_tab_page_edge = (nr == winnr())
+                              " Forward the switch panes command to tmux if:
+                              " a) we're toggling between the last tmux pane;
+                              " b) we tried switching windows in vim but it didn't have effect.
+    1   0.000023   0.000013   if s:ShouldForwardNavigationBackToTmux(tmux_last_pane, at_tab_page_edge)
+    1              0.000003     if g:tmux_navigator_save_on_switch == 1
+                                  try
+                                    update " save the active buffer. See :help update
+                                  catch /^Vim\%((\a\+)\)\=:E32/ " catches the no file name error
+                                  endtry
+    1              0.000002     elseif g:tmux_navigator_save_on_switch == 2
+                                  try
+                                    wall " save all the buffers. See :help wall
+                                  catch /^Vim\%((\a\+)\)\=:E141/ " catches the no file name error
+                                  endtry
+    1              0.000001     endif
+    1              0.000009     let args = 'select-pane -t ' . shellescape($TMUX_PANE) . ' -' . tr(a:direction, 'phjkl', 'lLDUR')
+    1   0.190706   0.000020     silent call s:TmuxCommand(args)
+    1   0.000026   0.000018     if s:NeedsVitalityRedraw()
+                                  redraw!
+    1              0.000001     endif
+    1              0.000004     let s:tmux_is_last_pane = 1
+                              else
+                                let s:tmux_is_last_pane = 0
+    1              0.000001   endif
+
+FUNCTION  <SNR>67_NeedsVitalityRedraw()
+    Defined: ~/local/share/nvim/site/pack/packer/start/vim-tmux-navigator/plugin/tmux_navigator.vim:82
+Called 1 time
+Total time:   0.000008
+ Self time:   0.000008
+
+count  total (s)   self (s)
+    1              0.000007   return exists('g:loaded_vitality') && v:version < 704 && !has("patch481")
+
+FUNCTION  <SNR>67_TmuxOrTmateExecutable()
+    Defined: ~/local/share/nvim/site/pack/packer/start/vim-tmux-navigator/plugin/tmux_navigator.vim:49
+Called 1 time
+Total time:   0.000011
+ Self time:   0.000011
+
+count  total (s)   self (s)
+    1              0.000010   return (match($TMUX, 'tmate') != -1 ? 'tmate' : 'tmux')
+
+FUNCTION  GetLuaIndent()
+    Defined: /gctmp/jesmith/.mount_nvimmxaX7G/usr/share/nvim/runtime/indent/lua.vim:26
+Called 1 time
+Total time:   0.000106
+ Self time:   0.000106
+
+count  total (s)   self (s)
+                              " Find a non-blank line above the current line.
+    1              0.000011   let prevlnum = prevnonblank(v:lnum - 1)
+                            
+                              " Hit the start of the file, use zero indent.
+    1              0.000003   if prevlnum == 0
+                                return 0
+    1              0.000001   endif
+                            
+                              " Add a 'shiftwidth' after lines that start a block:
+                              " 'function', 'if', 'for', 'while', 'repeat', 'else', 'elseif', '{'
+    1              0.000003   let ind = indent(prevlnum)
+    1              0.000002   let prevline = getline(prevlnum)
+    1              0.000020   let midx = match(prevline, '^\s*\%(if\>\|for\>\|while\>\|repeat\>\|else\>\|elseif\>\|do\>\|then\>\)')
+    1              0.000001   if midx == -1
+    1              0.000005     let midx = match(prevline, '{\s*$')
+    1              0.000001     if midx == -1
+    1              0.000010       let midx = match(prevline, '\<function\>\s*\%(\k\|[.:]\)\{-}\s*(')
+    1              0.000001     endif
+    1              0.000000   endif
+                            
+    1              0.000001   if midx != -1
+                                " Add 'shiftwidth' if what we found previously is not in a comment and
+                                " an "end" or "until" is not present on the same line.
+                                if synIDattr(synID(prevlnum, midx + 1, 1), "name") != "luaComment" && prevline !~ '\<end\>\|\<until\>'
+                                  let ind = ind + shiftwidth()
+                                endif
+    1              0.000000   endif
+                            
+                              " Subtract a 'shiftwidth' on end, else, elseif, until and '}'
+                              " This is the part that requires 'indentkeys'.
+    1              0.000010   let midx = match(getline(v:lnum), '^\s*\%(end\>\|else\>\|elseif\>\|until\>\|}\)')
+    1              0.000003   if midx != -1 && synIDattr(synID(v:lnum, midx + 1, 1), "name") != "luaComment"
+                                let ind = ind - shiftwidth()
+    1              0.000000   endif
+                            
+    1              0.000002   return ind
+
+FUNCTION  provider#clipboard#Call()
+    Defined: /gctmp/jesmith/.mount_nvimmxaX7G/usr/share/nvim/runtime/autoload/provider/clipboard.vim:230
+Called 2 times
+Total time:   0.007397
+ Self time:   0.000113
+
+count  total (s)   self (s)
+    2              0.000026   if get(s:, 'here', v:false)  " Clipboard provider must not recurse. #7184
+                                return 0
+    2              0.000003   endif
+    2              0.000007   let s:here = v:true
+    2              0.000002   try
+    2   0.007327   0.000043     return call(s:clipboard[a:method],a:args,s:clipboard)
+    2              0.000005   finally
+    2              0.000006     let s:here = v:false
+    2              0.000003   endtry
+
+FUNCTION  <SNR>67_TmuxCommand()
+    Defined: ~/local/share/nvim/site/pack/packer/start/vim-tmux-navigator/plugin/tmux_navigator.vim:62
+Called 1 time
+Total time:   0.190686
+ Self time:   0.000094
+
+count  total (s)   self (s)
+    1   0.000042   0.000021   let cmd = s:TmuxOrTmateExecutable() . ' -S ' . s:TmuxSocket() . ' ' . a:args
+    1              0.000004   let l:x=&shellcmdflag
+    1   0.000017   0.000011   let &shellcmdflag='-c'
+    1   0.190582   0.000029   let retval=system(cmd)
+    1   0.000033   0.000020   let &shellcmdflag=l:x
+    1              0.000004   return retval
+
+FUNCTION  <SNR>51_on_insert_leave()
+    Defined: ~/local/share/nvim/site/pack/packer/start/nvim-compe/plugin/compe.vim:32
+Called 1 time
+Total time:   0.000019
+ Self time:   0.000019
+
+count  total (s)   self (s)
+    1              0.000017   call luaeval('require"compe"._on_insert_leave()')
+
+FUNCTION  peekaboo#on()
+    Defined: ~/local/share/nvim/site/pack/packer/start/vim-peekaboo/plugin/peekaboo.vim:27
+Called 1 time
+Total time:   0.000103
+ Self time:   0.000103
+
+count  total (s)   self (s)
+    1              0.000007   if get(b:, 'peekaboo_on', 0)
+                                return
+    1              0.000001   endif
+                            
+    1              0.000005   let prefix = get(g:, 'peekaboo_prefix', '')
+    1              0.000003   let ins_prefix = get(g:, 'peekaboo_ins_prefix', '')
+    1              0.000040   execute 'nmap <buffer> <expr> '.prefix.    '"     peekaboo#peek(v:count1, ''"'',  0)'
+    1              0.000011   execute 'xmap <buffer> <expr> '.prefix.    '"     peekaboo#peek(v:count1, ''"'',  1)'
+    1              0.000015   execute 'nmap <buffer> <expr> '.prefix.    '@     peekaboo#peek(v:count1, ''@'', 0)'
+    1              0.000011   execute 'imap <buffer> <expr> '.ins_prefix.'<c-r> peekaboo#peek(1, "\<c-r>",  0)'
+    1              0.000002   let b:peekaboo_on = 1
+    1              0.000001   return ''
+
+FUNCTION  <SNR>51_on_text_changed()
+    Defined: ~/local/share/nvim/site/pack/packer/start/nvim-compe/plugin/compe.vim:39
+Called 5 times
+Total time:   0.000086
+ Self time:   0.000086
+
+count  total (s)   self (s)
+    5              0.000077   call luaeval('require"compe"._on_text_changed()')
+
+FUNCTION  <SNR>67_VimNavigate()
+    Defined: ~/local/share/nvim/site/pack/packer/start/vim-tmux-navigator/plugin/tmux_navigator.vim:10
+Called 1 time
+Total time:   0.000014
+ Self time:   0.000014
+
+count  total (s)   self (s)
+    1              0.000002   try
+    1              0.000006     execute 'wincmd ' . a:direction
+                              catch
+                                echohl ErrorMsg | echo 'E11: Invalid in command-line window; <CR> executes, CTRL-C quits: wincmd k' | echohl None
+    1              0.000001   endtry
+
+FUNCTION  <SNR>73_try_cmd()
+    Defined: /gctmp/jesmith/.mount_nvimmxaX7G/usr/share/nvim/runtime/autoload/provider/clipboard.vim:37
+Called 1 time
+Total time:   0.005065
+ Self time:   0.000082
+
+count  total (s)   self (s)
+    1   0.005041   0.000059   let out = systemlist(a:cmd, (a:0 ? a:1 : ['']), 1)
+    1              0.000005   if v:shell_error
+                                if !exists('s:did_error_try_cmd')
+                                  echohl WarningMsg
+                                  echomsg "clipboard: error: ".(len(out) ? out[0] : v:shell_error)
+                                  echohl None
+                                  let s:did_error_try_cmd = 1
+                                endif
+                                return 0
+    1              0.000001   endif
+    1              0.000003   return out
+
+FUNCTIONS SORTED ON TOTAL TIME
+count  total (s)   self (s)  function
+    1   0.190835   0.000117  <SNR>67_TmuxAwareNavigate()
+    1   0.190686   0.000094  <SNR>67_TmuxCommand()
+    2   0.007397   0.000113  provider#clipboard#Call()
+    1   0.005132   0.000067  2()
+    1   0.005065   0.000082  <SNR>73_try_cmd()
+    1   0.002152             3()
+    1   0.000106             GetLuaIndent()
+    1   0.000103             peekaboo#on()
+    5   0.000086             <SNR>51_on_text_changed()
+    3   0.000066             <SNR>64_wrap()
+    1   0.000019             1()
+    1   0.000019             <SNR>51_on_insert_leave()
+    1   0.000019             <SNR>51_on_insert_enter()
+    1   0.000014             <SNR>67_VimNavigate()
+    1   0.000011             <SNR>67_TmuxOrTmateExecutable()
+    1   0.000010             <SNR>67_TmuxSocket()
+    1   0.000010             <SNR>67_ShouldForwardNavigationBackToTmux()
+    1   0.000008             <SNR>67_NeedsVitalityRedraw()
+
+FUNCTIONS SORTED ON SELF TIME
+count  total (s)   self (s)  function
+    1              0.002152  3()
+    1   0.190835   0.000117  <SNR>67_TmuxAwareNavigate()
+    2   0.007397   0.000113  provider#clipboard#Call()
+    1              0.000106  GetLuaIndent()
+    1              0.000103  peekaboo#on()
+    1   0.190686   0.000094  <SNR>67_TmuxCommand()
+    5              0.000086  <SNR>51_on_text_changed()
+    1   0.005065   0.000082  <SNR>73_try_cmd()
+    1   0.005132   0.000067  2()
+    3              0.000066  <SNR>64_wrap()
+    1              0.000019  1()
+    1              0.000019  <SNR>51_on_insert_leave()
+    1              0.000019  <SNR>51_on_insert_enter()
+    1              0.000014  <SNR>67_VimNavigate()
+    1              0.000011  <SNR>67_TmuxOrTmateExecutable()
+    1              0.000010  <SNR>67_TmuxSocket()
+    1              0.000010  <SNR>67_ShouldForwardNavigationBackToTmux()
+    1              0.000008  <SNR>67_NeedsVitalityRedraw()
+
