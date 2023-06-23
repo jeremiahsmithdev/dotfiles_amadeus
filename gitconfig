@@ -1,0 +1,23 @@
+[core]
+	editor = nvim
+	EDITOR = nvim
+[include]
+path=/remote/tmp/mwdeldev/ngdpack-15/dcs/profiles/default/projects/gitconfig
+[user]
+	name = jesmith
+	email = jeremiah.smith@amadeus.com
+	password = Thr3ftygui!2
+[credential]
+	helper = store
+[include]
+path=/remote/tmp/mwdeldev/ngdpack-15/dcs/profiles/default/projects/gitconfig
+[core]
+	editor = nvim
+[alias]
+	lol = log --graph --pretty=format:\"%C(auto)%h %C(cyan)%an %C(green)%ar %C(auto)%d %s\"
+    edit = !$EDITOR $(git status --short | awk '$1 ~ /^M|A|U/ {print $2}' )
+    last = !$EDITOR $(git diff --name-status HEAD~1 | awk '$1 ~ /^M|A|U/ {print $2}' )
+    ignore = !$EDITOR .git/info/exclude
+    exclude = !$EDITOR .git/info/exclude
+[include]
+path=/remote/tmp/mwdeldev/ngdpack-15/dcs/profiles/default/projects/gitconfig
